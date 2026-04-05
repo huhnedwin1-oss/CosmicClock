@@ -4,7 +4,11 @@ const liquidAnim = lottie.loadAnimation({
     renderer: 'svg',
     loop: false,
     autoplay: false, 
-    path: 'data.json' 
+    path: 'data.json',
+    // 🟢 ADD THIS: Forces the animation to scale up to fill the screen (cropping slightly if needed)
+    rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice'
+    }
 });
 
 let time1 = 0; 
