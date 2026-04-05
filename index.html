@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Seesaw Chess Clock</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@800&family=Roboto+Mono:wght@700&display=swap');
+
+        * { box-sizing: border-box; touch-action: none; }
+        body { 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            width: 100vw;
+            font-family: 'Kanit', -apple-system, sans-serif; 
+            overflow: hidden; 
+            background: #111; 
+            color: white; 
+            user-select: none;
+            overscroll-behavior: none;
+        }
+        
+        #clock-container {
+            display: flex;
+            flex-direction: column; 
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .clock-side { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 22vw; 
+            /* Enforcing the monospace font specifically for the numbers */
+            font-family: 'Roboto Mono', monospace; 
+            text-align: center; 
+            transition: all 0.2s ease; 
+            opacity: 0.2;
+            background: #1a1a1a;
+            line-height: 1;
+            width: 100%;
+        }
+        
+        .active { 
+            opacity: 1; 
+            background: #000; 
+            box-shadow: inset 0 0 80px rgba(255,255,255,0.05);
+        }
+
+        #player2 { 
+            transform: rotate(180deg); 
+            border-bottom: 4px solid #222;
+        }
+
+        #center-controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-btn {
+            position: absolute;
+            background: #111;
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 20px;
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+        }
+
+        #pauseBtn { z-index: 15; }
+        #pauseBtn.greyed {
+            opacity: 0.3;
+            border-color: #555;
+            color: #555;
+        }
+
+        #stopBtn { font-size: 4rem; }
+
+        #playBtn { transform: scale(0.5); opacity: 0; pointer-events: none; }
+        #stopBtn { transform: scale(0.5); opacity: 0; pointer-events: none; }
+
+        #playBtn.spread { transform: translateY(-110px) scale(1); opacity: 1; pointer-events: auto; }
+        #stopBtn.spread { transform: translateY(110px) scale(1); opacity: 1; pointer-events: auto; }
+
+        #menu-overlay { 
+            position: fixed; inset: 0; 
+            background: #111; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-direction: column; 
+            z-index: 30;
+            padding: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .preset-btn {
+            background: #222;
+            color: #fff;
+            border: 2px solid #333;
+            padding: 30px 10px; 
+            font-size: 1.6rem;
+            font-family: 'Kanit', sans-serif;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:active {
+            background: #fff;
+            color: #000;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="menu-overlay">
+        <div class="grid" id="preset-grid">
+            <button class="preset-btn" data-time="1" data-inc="0">1 | 0</button>
+            <button class="preset-btn" data-time="2" data-inc="1">2 | 1</button>
+            <button class="preset-btn" data-time="3" data-inc="0">3 | 0</button>
+            <button class="preset-btn" data-time="3" data-inc="2">3 | 2</button>
+            <button class="preset-btn" data-time="5" data-inc="0">5 | 0</button>
+            <button class="preset-btn" data-time="5" data-inc="3">5 | 3</button>
+            <button class="preset-btn" data-time="10" data-inc="0">10 | 0</button>
+            <button class="preset-btn" data-time="15" data-inc="10">15 | 10</button>
+            <button class="preset-btn" id="customBtn">...</button>
+        </div>
+    </div>
+
+    <div id="clock-container">
+        <div id="player2" class="clock-side">00:00</div>
+        
+        <div id="center-controls" style="display: none;">
+            <button id="playBtn" class="action-btn">▶</button>
+            <button id="pauseBtn" class="action-btn">❚❚</button>
+            <button id="stopBtn" class="action-btn">■</button>
+        </div>
+
+        <div id="player1" class="clock-side active">00:00</div>
+    </div>
+
+    <script>
+        let time1 = 0; 
+        let time2 = 0;
+        let increment = 0;
+        let activePlayer = 0; 
+        let timerInterval;
+        let wakeLock = null; 
+        let isPaused = false;
+        let isSystemInitialized = false; 
+        
+        const p1Display = document.getElementById('player1');
+        const p2Display = document.getElementById('player2');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const presetBtns = document.querySelectorAll('.preset-btn:not(#customBtn)');
+        const customBtn = document.getElementById('customBtn');
+        
+        const centerControls = document.getElementById('center-controls');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        let audioCtx;
+
+        function initAndStart() {
+            if (!isSystemInitialized) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                enableWakeLockAndFullscreen(); 
+
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('deviceorientation', handleOrientation);
+                                isSystemInitialized = true;
+                                startGame();
+                            } else {
+                                alert("Sensor permission is required.");
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    isSystemInitialized = true;
+                    startGame();
+                }
+            } else {
+                startGame();
+            }
+        }
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mins = parseInt(btn.getAttribute('data-time'));
+                time1 = mins * 60;
+                time2 = mins * 60;
+                increment = parseInt(btn.getAttribute('data-inc'));
+                updateDisplay();
+                initAndStart();
+            });
+        });
+
+        customBtn.addEventListener('click', () => {
+            let customMin = prompt("Enter Base Time (Minutes):", "5");
+            let customInc = prompt("Enter Increment (Seconds):", "0");
+            
+            if (customMin !== null && !isNaN(customMin)) {
+                time1 = parseInt(customMin) * 60;
+                time2 = parseInt(customMin) * 60;
+                increment = parseInt(customInc) || 0;
+                updateDisplay();
+                initAndStart();
+            }
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (!isPaused) {
+                isPaused = true;
+                clearInterval(timerInterval);
+                pauseBtn.classList.add('greyed');
+                playBtn.classList.add('spread');
+                stopBtn.classList.add('spread');
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            isPaused = false;
+            playBtn.classList.remove('spread');
+            stopBtn.classList.remove('spread');
+            pauseBtn.classList.remove('greyed');
+            setTimeout(() => { timerInterval = setInterval(tick, 1000); }, 300);
+        });
+
+        stopBtn.addEventListener('click', () => {
+            isPaused = false;
+            clearInterval(timerInterval);
+            playBtn.classList.remove('spread');
+            stopBtn.classList.remove('spread');
+            pauseBtn.classList.remove('greyed');
+            centerControls.style.display = 'none';
+            menuOverlay.style.display = 'flex';
+            activePlayer = 0;
+        });
+
+        function playThump() {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.1);
+            
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateDisplay() {
+            // Updating clean text directly
+            p1Display.textContent = formatTime(time1);
+            p2Display.textContent = formatTime(time2);
+            
+            if (activePlayer === 1) {
+                p1Display.classList.add('active');
+                p2Display.classList.remove('active');
+            } else if (activePlayer === 2) {
+                p2Display.classList.add('active');
+                p1Display.classList.remove('active');
+            }
+        }
+
+        function tick() {
+            if (activePlayer === 1 && time1 > 0) time1--;
+            else if (activePlayer === 2 && time2 > 0) time2--;
+            updateDisplay();
+        }
+
+        function switchPlayer(newPlayer) {
+            if (activePlayer !== newPlayer) {
+                if (activePlayer === 1) time1 += increment;
+                else if (activePlayer === 2) time2 += increment;
+                
+                activePlayer = newPlayer;
+                playThump(); 
+                updateDisplay();
+            }
+        }
+
+        function handleOrientation(event) {
+            if (isPaused) return; 
+
+            const tilt = event.beta; 
+            if (tilt > 5) {
+                switchPlayer(2); 
+            } else if (tilt < -5) {
+                switchPlayer(1); 
+            }
+        }
+
+        async function enableWakeLockAndFullscreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(e => console.log(e));
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen().catch(e => console.log(e)); 
+            }
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {}
+        }
+
+        function startGame() {
+            menuOverlay.style.display = 'none';
+            centerControls.style.display = 'flex';
+            timerInterval = setInterval(tick, 1000);
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
