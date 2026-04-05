@@ -23,6 +23,13 @@ body {
     height: 100%;
     z-index: 1;
     pointer-events: none; /* Crucial: Lets taps pass through to the buttons */
+    /* Ensure the flip happens instantly with no transition delay */
+    transition: transform 0s; 
+}
+
+/* Add this new flipped state! */
+#liquid-bg.flipped {
+    transform: rotate(180deg);
 }
 
 #clock-container {
