@@ -51,12 +51,14 @@ body {
     text-align: center; 
     transition: all 0.2s ease; 
     opacity: 0.3;
-    /* Transparent background so you can see the fluid behind inactive side */
     background: rgba(26, 26, 26, 0.6);
     backdrop-filter: blur(4px);
     line-height: 1;
     width: 100%;
-    text-shadow: 0px 4px 15px rgba(0,0,0,0.8); /* Helps text pop against orange fluid */
+    text-shadow: 0px 4px 15px rgba(0,0,0,0.8);
+    
+    /* 🟢 ADD THIS LINE: Adjust the 10vh higher or lower to change the spacing */
+    padding-top: 10vh; 
 }
 
 .active { 
