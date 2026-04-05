@@ -163,13 +163,23 @@ function switchPlayer(newPlayer) {
         playThump(); 
         updateDisplay();
 
-        // Trigger the liquid animation based on who just became active
+        // 🟢 THE NEW FLIP LOGIC
+        const liquidContainer = document.getElementById('liquid-bg');
+
+        // Always force the animation to play forward from the very beginning
+        liquidAnim.setDirection(1);
+
         if (activePlayer === 1) {
-            liquidAnim.setDirection(-1); // Play backward
-            liquidAnim.play();
+            // Player 1 is active (Bottom of screen)
+            // Keep container normal, play from frame 0
+            liquidContainer.classList.remove('flipped');
+            liquidAnim.goToAndPlay(0, true); 
+            
         } else if (activePlayer === 2) {
-            liquidAnim.setDirection(1);  // Play forward
-            liquidAnim.play();
+            // Player 2 is active (Top of screen)
+            // Flip container 180deg, play from frame 0
+            liquidContainer.classList.add('flipped');
+            liquidAnim.goToAndPlay(0, true); 
         }
     }
 }
