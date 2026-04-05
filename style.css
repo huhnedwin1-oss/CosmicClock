@@ -62,14 +62,16 @@ body {
     padding-top: 10vh; 
 }
 
-/*
 .active { 
+    /* This is the magic line that makes the active text bright white again! */
     opacity: 1; 
+    
+    /* These keep the background pure black */
     background: transparent; 
     backdrop-filter: none;
     box-shadow: none; 
 }
-*/
+
 #player2 { 
     transform: rotate(180deg); 
     /* 🟢 Removed the line cutting the screen in half */
