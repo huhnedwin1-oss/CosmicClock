@@ -62,14 +62,14 @@ body {
     padding-top: 10vh; 
 }
 
+/*
 .active { 
     opacity: 1; 
     background: transparent; 
     backdrop-filter: none;
-    /* 🟢 Removed the inner box shadow */
     box-shadow: none; 
 }
-
+*/
 #player2 { 
     transform: rotate(180deg); 
     /* 🟢 Removed the line cutting the screen in half */
