@@ -88,34 +88,32 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 .action-btn {
     position: absolute;
-    background: transparent;
-    /* Use the same orange as your Lottie fluid */
-    color: #ff7b00; 
-    border: 2px solid #ff7b00;
-    border-radius: 15px; /* Slightly sharper, techy corners */
+    /* Glass Effect */
+    background: rgba(255, 255, 255, 0.1); 
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    
+    /* Layout & Shape */
+    color: white;
+    border-radius: 50%; /* Makes it a sleek circle */
     width: 80px;
     height: 80px;
-    font-size: 2rem;
+    font-size: 1.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    
-    /* Outer glow and Inner glow */
-    box-shadow: 0 0 15px rgba(255, 123, 0, 0.3), inset 0 0 10px rgba(255, 123, 0, 0.1);
-    text-shadow: 0 0 8px rgba(255, 123, 0, 0.8);
     z-index: 10;
+    
+    /* Smooth Transition */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Interaction: Glow intensifies when pressed */
 .action-btn:active {
-    transform: scale(0.95);
-    background: rgba(255, 123, 0, 0.15);
-    box-shadow: 0 0 25px rgba(255, 123, 0, 0.6), inset 0 0 15px rgba(255, 123, 0, 0.4);
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.9); /* Gives a nice tactile "press" feel */
 }
 
 /* Update the Pause state to match the Neon vibe */
