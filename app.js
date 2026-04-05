@@ -1,35 +1,209 @@
-// 1. Initialize and load the Lottie Animation
+// Initialize Lottie
 const liquidAnim = lottie.loadAnimation({
-    container: document.getElementById('liquid-bg'), 
+    container: document.getElementById('liquid-bg'),
     renderer: 'svg',
-    loop: false, // We only want it to slosh once per tap
-    autoplay: false, // Wait for the user to tap to start
-    path: 'data.json' // Make sure your Bodymovin file is named exactly this!
+    loop: false,
+    autoplay: false, 
+    path: 'data.json' 
 });
 
-// 2. Track where the liquid is
-let isLiquidAtBottom = false;
+let time1 = 0; 
+let time2 = 0;
+let increment = 0;
+let activePlayer = 0; 
+let timerInterval;
+let wakeLock = null; 
+let isPaused = false;
+let isSystemInitialized = false; 
 
-// 3. Listen for taps on the screen
-document.getElementById('app-wrapper').addEventListener('click', (event) => {
-    
-    // Ignore the tap if the user specifically clicked the Pause button
-    if (event.target.id === 'pause-btn') {
-        console.log("Pause button tapped!"); 
-        // You will add your actual timer pause logic here later
-        return; 
-    }
+const p1Display = document.getElementById('player1');
+const p2Display = document.getElementById('player2');
+const menuOverlay = document.getElementById('menu-overlay');
+const presetBtns = document.querySelectorAll('.preset-btn:not(#customBtn)');
+const customBtn = document.getElementById('customBtn');
 
-    // Toggle the fluid direction based on its current state
-    if (!isLiquidAtBottom) {
-        // Play Forward (Fluid sloshes to the bottom)
-        liquidAnim.setDirection(1);
-        liquidAnim.play();
-        isLiquidAtBottom = true;
+const centerControls = document.getElementById('center-controls');
+const pauseBtn = document.getElementById('pauseBtn');
+const playBtn = document.getElementById('playBtn');
+const stopBtn = document.getElementById('stopBtn');
+
+let audioCtx;
+
+function initAndStart() {
+    if (!isSystemInitialized) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        enableWakeLockAndFullscreen(); 
+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        isSystemInitialized = true;
+                        startGame();
+                    } else {
+                        alert("Sensor permission is required.");
+                    }
+                })
+                .catch(console.error);
+        } else {
+            window.addEventListener('deviceorientation', handleOrientation);
+            isSystemInitialized = true;
+            startGame();
+        }
     } else {
-        // Play Backward (Fluid sloshes back to the top)
-        liquidAnim.setDirection(-1);
-        liquidAnim.play();
-        isLiquidAtBottom = false;
+        startGame();
+    }
+}
+
+presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const mins = parseInt(btn.getAttribute('data-time'));
+        time1 = mins * 60;
+        time2 = mins * 60;
+        increment = parseInt(btn.getAttribute('data-inc'));
+        updateDisplay();
+        initAndStart();
+    });
+});
+
+customBtn.addEventListener('click', () => {
+    let customMin = prompt("Enter Base Time (Minutes):", "5");
+    let customInc = prompt("Enter Increment (Seconds):", "0");
+    
+    if (customMin !== null && !isNaN(customMin)) {
+        time1 = parseInt(customMin) * 60;
+        time2 = parseInt(customMin) * 60;
+        increment = parseInt(customInc) || 0;
+        updateDisplay();
+        initAndStart();
     }
 });
+
+pauseBtn.addEventListener('click', () => {
+    if (!isPaused) {
+        isPaused = true;
+        clearInterval(timerInterval);
+        pauseBtn.classList.add('greyed');
+        playBtn.classList.add('spread');
+        stopBtn.classList.add('spread');
+    }
+});
+
+playBtn.addEventListener('click', () => {
+    isPaused = false;
+    playBtn.classList.remove('spread');
+    stopBtn.classList.remove('spread');
+    pauseBtn.classList.remove('greyed');
+    setTimeout(() => { timerInterval = setInterval(tick, 1000); }, 300);
+});
+
+stopBtn.addEventListener('click', () => {
+    isPaused = false;
+    clearInterval(timerInterval);
+    playBtn.classList.remove('spread');
+    stopBtn.classList.remove('spread');
+    pauseBtn.classList.remove('greyed');
+    centerControls.style.display = 'none';
+    menuOverlay.style.display = 'flex';
+    activePlayer = 0;
+});
+
+function playThump() {
+    if (!audioCtx) return;
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.1);
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function updateDisplay() {
+    p1Display.textContent = formatTime(time1);
+    p2Display.textContent = formatTime(time2);
+    
+    if (activePlayer === 1) {
+        p1Display.classList.add('active');
+        p2Display.classList.remove('active');
+    } else if (activePlayer === 2) {
+        p2Display.classList.add('active');
+        p1Display.classList.remove('active');
+    }
+}
+
+function tick() {
+    if (activePlayer === 1 && time1 > 0) time1--;
+    else if (activePlayer === 2 && time2 > 0) time2--;
+    updateDisplay();
+}
+
+function switchPlayer(newPlayer) {
+    if (activePlayer !== newPlayer) {
+        if (activePlayer === 1) time1 += increment;
+        else if (activePlayer === 2) time2 += increment;
+        
+        activePlayer = newPlayer;
+        playThump(); 
+        updateDisplay();
+
+        // Trigger the liquid animation based on who just became active
+        if (activePlayer === 1) {
+            liquidAnim.setDirection(-1); // Play backward
+            liquidAnim.play();
+        } else if (activePlayer === 2) {
+            liquidAnim.setDirection(1);  // Play forward
+            liquidAnim.play();
+        }
+    }
+}
+
+function handleOrientation(event) {
+    if (isPaused) return; 
+
+    const tilt = event.beta; 
+    if (tilt > 5) {
+        switchPlayer(2); 
+    } else if (tilt < -5) {
+        switchPlayer(1); 
+    }
+}
+
+async function enableWakeLockAndFullscreen() {
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(e => console.log(e));
+    } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen().catch(e => console.log(e)); 
+    }
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+        }
+    } catch (err) {}
+}
+
+function startGame() {
+    menuOverlay.style.display = 'none';
+    centerControls.style.display = 'flex';
+    
+    activePlayer = 1; 
+    updateDisplay();
+    
+    timerInterval = setInterval(tick, 1000);
+}
