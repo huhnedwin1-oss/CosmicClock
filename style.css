@@ -80,58 +80,53 @@ body {
 
 #center-controls {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-
-#center-controls {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 300px; /* Adjust this to match your AE composition width */
-    height: 120px; /* Adjust this to match your AE composition height */
 }
 
 #btn-lottie {
     position: absolute;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Lets clicks pass through to the buttons */
+    pointer-events: none;
 }
 
 .invisible-hitbox {
     position: absolute;
+    /* Vertically center all hitboxes */
+    top: 50%; 
     border: none;
-    width: 65px; 
-    height: 65px;
+    width: 80px; 
+    height: 80px;
     cursor: pointer;
     z-index: 10;
     -webkit-tap-highlight-color: transparent;
     
-    /* 🔴 Visual Hitbox Test: Uncomment the line below to see your click areas! */
+    /* 🔴 Turn this back on to test your alignment! */
     background: rgba(255, 0, 0, 0.5); 
 }
 
-/* Pause button stays in the middle */
-#pauseBtn { left: 50%; transform: translateX(-50%); }
+/* Pause button stays exactly in the center */
+#pauseBtn { 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+}
 
-/* Play and Stop sit on the sides, hidden until Pause is clicked */
-#playBtn { right: 45px; display: none; }
-#stopBtn { left: 45px; display: none; }
-
-
-
+/* Play and Stop start from the center, then get pushed outward */
+/* Tweak the "150px" to match how far they slide in your animation */
+#stopBtn { 
+    left: 50%; 
+    transform: translate(-150px, -50%); 
+    display: none; 
+}
+#playBtn { 
+    left: 50%; 
+    transform: translate(150px, -50%); 
+    display: none; 
+}
 #menu-overlay { 
     position: fixed; inset: 0; 
     background: #111; 
