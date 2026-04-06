@@ -1,4 +1,3 @@
-@@ -1,219 +1,214 @@
 // Initialize Lottie
 const liquidAnim = lottie.loadAnimation({
     container: document.getElementById('liquid-bg'),
