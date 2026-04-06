@@ -89,65 +89,48 @@ body {
     align-items: center;
 }
 
-.action-btn {
+
+#center-controls {
     position: absolute;
-    background: transparent;
-    /* Use the same orange as your Lottie fluid */
-    color: #ff7b00; 
-    border: 2px solid #ff7b00;
-    border-radius: 15px; /* Slightly sharper, techy corners */
-    /* Glass Effect */
-    background: rgba(255, 255, 255, 0.1); 
-    backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    
-    /* Layout & Shape */
-    color: white;
-    border-radius: 50%; /* Makes it a sleek circle */
-    width: 80px;
-    height: 80px;
-    font-size: 2rem;
-    font-size: 1.5rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 300px; /* Adjust this to match your AE composition width */
+    height: 120px; /* Adjust this to match your AE composition height */
+}
+
+#btn-lottie {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Lets clicks pass through to the buttons */
+}
+
+.invisible-hitbox {
+    position: absolute;
+    border: none;
+    width: 65px; 
+    height: 65px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    
-    /* Outer glow and Inner glow */
-    box-shadow: 0 0 15px rgba(255, 123, 0, 0.3), inset 0 0 10px rgba(255, 123, 0, 0.1);
-    text-shadow: 0 0 8px rgba(255, 123, 0, 0.8);
     z-index: 10;
+    -webkit-tap-highlight-color: transparent;
     
-    /* Smooth Transition */
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 🔴 Visual Hitbox Test: Uncomment the line below to see your click areas! */
+    background: rgba(255, 0, 0, 0.5); 
 }
 
-/* Interaction: Glow intensifies when pressed */
-.action-btn:active {
-    transform: scale(0.95);
-    background: rgba(255, 123, 0, 0.15);
-    box-shadow: 0 0 25px rgba(255, 123, 0, 0.6), inset 0 0 15px rgba(255, 123, 0, 0.4);
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(0.9); /* Gives a nice tactile "press" feel */
-}
+/* Pause button stays in the middle */
+#pauseBtn { left: 50%; transform: translateX(-50%); }
 
-/* Update the Pause state to match the Neon vibe */
-#pauseBtn.greyed {
-    opacity: 0.3;
-    border-color: #444;
-    color: #444;
-    box-shadow: none;
-    text-shadow: none;
-}
+/* Play and Stop sit on the sides, hidden until Pause is clicked */
+#playBtn { right: 45px; display: none; }
+#stopBtn { left: 45px; display: none; }
 
 
-#stopBtn { font-size: 4rem; }
-#playBtn { transform: scale(0.5); opacity: 0; pointer-events: none; }
-#stopBtn { transform: scale(0.5); opacity: 0; pointer-events: none; }
-
-#playBtn.spread { transform: translateY(-110px) scale(1); opacity: 1; pointer-events: auto; }
-#stopBtn.spread { transform: translateY(110px) scale(1); opacity: 1; pointer-events: auto; }
 
 #menu-overlay { 
     position: fixed; inset: 0; 
