@@ -93,20 +93,18 @@ body {
     height: 100%;
     pointer-events: none;
 }
-
 .invisible-hitbox {
     position: absolute;
-    /* Vertically center all hitboxes */
     top: 50%; 
     border: none;
-    width: 65px; 
-    height: 65px;
+    width: 80px; /* Or whatever custom size you ended up using! */
+    height: 80px;
     cursor: pointer;
     z-index: 10;
     -webkit-tap-highlight-color: transparent;
     
-    /* 🔴 Turn this back on to test your alignment! */
-    background: rgba(255, 0, 0, 0.5); 
+    /* 🟢 The red background line is completely gone! */
+    background: transparent; 
 }
 
 /* Pause button stays exactly in the center */
