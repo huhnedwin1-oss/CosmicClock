@@ -11,6 +11,14 @@ const liquidAnim = lottie.loadAnimation({
     }
 });
 
+const btnAnim = lottie.loadAnimation({
+    container: document.getElementById('btn-lottie'),
+    renderer: 'svg',
+    loop: false,
+    autoplay: false, 
+    path: 'buttons.json' 
+});
+
 let time1 = 0; 
 let time2 = 0;
 let increment = 0;
