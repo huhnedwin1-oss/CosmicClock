@@ -1,11 +1,11 @@
 // Initialize Lottie
-const liquidAnim = lottie.loadAnimation({
-    container: document.getElementById('liquid-bg'),
+const btnAnim = lottie.loadAnimation({
+    container: document.getElementById('btn-lottie'),
     renderer: 'svg',
     loop: false,
     autoplay: false, 
-    path: 'data.json',
-    // 🟢 ADDED: Forces the animation to scale up and cover the black bars
+    path: 'buttons.json',
+    // 🟢 ADD THIS: Forces buttons to scale exactly like the fluid background
     rendererSettings: {
         preserveAspectRatio: 'xMidYMid slice'
     }
