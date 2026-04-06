@@ -96,26 +96,44 @@ pauseBtn.addEventListener('click', () => {
     if (!isPaused) {
         isPaused = true;
         clearInterval(timerInterval);
-        pauseBtn.classList.add('greyed');
-        playBtn.classList.add('spread');
-        stopBtn.classList.add('spread');
+        
+        // 1. Play the "Split" animation (Frames 0 to 24)
+        btnAnim.playSegments([0, 24], true);
+        
+        // 2. Hide Pause hitbox, reveal Play and Stop hitboxes
+        pauseBtn.style.display = 'none';
+        playBtn.style.display = 'block';
+        stopBtn.style.display = 'block';
     }
 });
 
 playBtn.addEventListener('click', () => {
     isPaused = false;
-    playBtn.classList.remove('spread');
-    stopBtn.classList.remove('spread');
-    pauseBtn.classList.remove('greyed');
+    
+    // 1. Instantly reset to Frame 0 (Pause button state)
+    btnAnim.goToAndStop(0, true);
+    
+    // 2. Hide Play/Stop hitboxes, bring back Pause
+    playBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+    pauseBtn.style.display = 'block';
+    
     setTimeout(() => { timerInterval = setInterval(tick, 1000); }, 300);
 });
 
 stopBtn.addEventListener('click', () => {
     isPaused = false;
     clearInterval(timerInterval);
-    playBtn.classList.remove('spread');
-    stopBtn.classList.remove('spread');
-    pauseBtn.classList.remove('greyed');
+    
+    // 1. Instantly reset to Frame 0 (Pause button state)
+    btnAnim.goToAndStop(0, true);
+    
+    // 2. Reset hitboxes
+    playBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+    pauseBtn.style.display = 'block';
+    
+    // 3. Return to time selection menu
     centerControls.style.display = 'none';
     menuOverlay.style.display = 'flex';
     activePlayer = 0;
