@@ -119,12 +119,12 @@ body {
 /* Tweak the "150px" to match how far they slide in your animation */
 #stopBtn { 
     left: 50%; 
-    transform: translate(-150px, -50%); 
+    transform: translate(-130px, -50%); 
     display: none; 
 }
 #playBtn { 
     left: 50%; 
-    transform: translate(150px, -50%); 
+    transform: translate(80px, -50%); 
     display: none; 
 }
 #menu-overlay { 
