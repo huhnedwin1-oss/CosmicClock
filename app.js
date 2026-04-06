@@ -1,25 +1,29 @@
-// Initialize Lottie
+// 1. Initialize the Fluid Background
+const liquidAnim = lottie.loadAnimation({
+    container: document.getElementById('liquid-bg'),
+    renderer: 'svg',
+    loop: false,
+    autoplay: false, 
+    path: 'data.json',
+    rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice'
+    }
+});
+
+// 2. Initialize the Interactive Buttons
 const btnAnim = lottie.loadAnimation({
     container: document.getElementById('btn-lottie'),
     renderer: 'svg',
     loop: false,
     autoplay: false, 
     path: 'buttons.json',
-    // 🟢 ADD THIS: Forces buttons to scale exactly like the fluid background
     rendererSettings: {
         preserveAspectRatio: 'xMidYMid slice'
     }
 });
 
-const btnAnim = lottie.loadAnimation({
-    container: document.getElementById('btn-lottie'),
-    renderer: 'svg',
-    loop: false,
-    autoplay: false, 
-    path: 'buttons.json' 
-});
-
 let time1 = 0; 
+// ... rest of your code continues below normally ...
 let time2 = 0;
 let increment = 0;
 let activePlayer = 0; 
