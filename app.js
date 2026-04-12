@@ -16,7 +16,7 @@ const btnAnim = lottie.loadAnimation({
     renderer: 'svg',
     loop: false,
     autoplay: false, 
-    path: 'buttons.json',
+    path: 'buttons2.json',
     rendererSettings: {
         preserveAspectRatio: 'xMidYMid slice'
     }
